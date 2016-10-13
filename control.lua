@@ -23,7 +23,7 @@ script.on_event(defines.events.on_player_created, function(event)
 
   set_player_team(player, "pregame")
   show_status_gui_for_player(player)
-	--create_team_chooser_gui(player)
+  create_team_change_gui(player)
 
 end)
 

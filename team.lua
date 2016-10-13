@@ -30,12 +30,8 @@ team_locations = {
 
 }
 
-global.team_score = {
-  red = 0,
-  blue = 0,
-  yellow = 0,
-  purple = 0,
-}
+-- Holds the team score
+global.team_score = {}
 
 function set_teams_positions()
   surface = game.surfaces['nauvis']

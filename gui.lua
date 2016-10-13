@@ -11,8 +11,8 @@ flow_style =
 {
 	top_padding = 0,
 	bottom_padding = 0,
-	left_padding = 5,
-	right_padding = 5,
+	left_padding = 3,
+	right_padding = 3,
 	resize_row_to_width = true,
 
 }
@@ -30,9 +30,7 @@ textfield_style =
 
 table_style =
 {
-  --cell_spacing = 0,
-  vertical_spacing = 2,
-  horizontal_spacing = 5,
+  cell_spacing = 3,
   top_padding = 0,
 	right_padding = 0,
 	bottom_padding = 0,
@@ -61,6 +59,12 @@ button_team_choose_style =
   minimal_height = 80,
 }
 
+-- Holds the label of the amount of players on teams
+global.team_count_label = {}
+
+-- Holds the team score labels
+global.team_score_label = {}
+
 -- Applies the style to the element given a style array
 
 function apply_style(style_arr, element)
@@ -69,7 +73,7 @@ function apply_style(style_arr, element)
   end
 end
 
--- Team count guy update
+-- Show status GUI for a player
 
 function show_status_gui_for_player(player)
 
@@ -81,6 +85,7 @@ function show_status_gui_for_player(player)
     -- Creates the player count flow
     local flow = frame.add({type = "flow", direction = "vertical"})
     apply_style(flow_style, flow)
+
     -- Creates the player count labels
     local label = flow.add{type = "label", caption = "Players on team"}
     label.style.font="default-large-bold"
@@ -91,8 +96,8 @@ function show_status_gui_for_player(player)
     for _,team in ipairs(teams) do
       if(team ~= "pregame") then
 
-        label = table.add{type = "label", caption = get_team_count(team)}
-        label.style.font="default-large"
+        global.team_count_label[team] = table.add{type = "label", caption = get_team_count(team)}
+        global.team_count_label[team].style.font="default-large"
 
         label = table.add{type = "label", caption = {team}}
         label.style.font_color=team_colors[team]
@@ -117,44 +122,45 @@ function show_status_gui_for_player(player)
         label.style.font_color=team_colors[team]
         label.style.font="default-listbox"
 
-        label = table.add{type = "label", caption = global.team_score[team]}
-        label.style.font="default-large"
+        global.team_score_label[team] = table.add{type = "label", caption = global.team_score[team]}
+        global.team_score_label[team].style.font="default-large"
 
       end
     end
 
-    -- SHOW THE OBJECTIVES
+    -- Creates the objectives flow
 
-    local flow = frame.add({type = "flow", name = "flw_obj", direction = "vertical"})
-    apply_style(flow_style, frame)
+    flow = frame.add({type = "flow", direction = "vertical"})
+    apply_style(flow_style, flow)
 
-    flow.add{type = "label", caption = "Objective", name="obj_title"}
-    flow.obj_title.style.font="default-large-bold"
+    label = flow.add{type = "label", caption = "Objectives"}
+    label.style.font="default-large-bold"
 
-    flow.add{type = "label", caption = "Get a life", name="obj1"}
-    flow.obj1.style.font="default"
+    label = flow.add{type = "label", caption = {"objective1"}}
+    label.style.font="default"
 
-    flow.add{type = "label", caption = "Get a job", name="obj2"}
-    flow.obj2.style.font="default"
+    label = flow.add{type = "label", caption = {"objective2"}}
+    label.style.font="default"
+
+    label = flow.add{type = "label", caption = {"objective3"}}
+    label.style.font="default"
 
 end
 
--- TEAM CHOOSER GUI
+-- Creates the team change GUI
 
-function create_team_chooser_gui( player )
-	if (not player.gui.center["flow_team_chooser"]) then
+function create_team_change_gui(player)
+	if (not player.gui.center["team_change_gui"]) then
 
-    local flow = player.gui.center.add({type = "flow", name = "flow_team_chooser", direction = "horizontal"})
-
-		local frame = flow.add{type="frame", caption = "Choose a team", name="frm_team_chooser"}
+		local frame = player.gui.center.add{type="frame", caption = "Choose a team", name="team_change_gui"}
     apply_style(frame_style, frame)
 
-    frame = frame.add({type = "flow", name = "flw_team_chooser", direction = "vertical"})
-    apply_style(flow_style, frame)
+    local flow = frame.add({type = "flow", direction = "vertical"})
+    apply_style(flow_style, flow)
 
 		for _,team in ipairs(teams) do
 			if (team ~= "pregame") then
-				button = frame.add{type="button", name="button-team-"..team, caption={team}}
+				local button = flow.add{type="button", name="choose-team-"..team, caption={team}}
         apply_style(button_team_choose_style, button)
         button.style.font_color=team_colors[team]
 			end
@@ -162,33 +168,27 @@ function create_team_chooser_gui( player )
 	end
 end
 
+function update_team_count_label(team)
+  global.team_count_label[team].caption = get_team_count(team)
+end
+
 -- GUI Callback
 
 script.on_event(defines.events.on_gui_click, function(event)
 	local player = game.players[event.element.player_index]
+
 	for _,team in ipairs(teams) do
-		if (event.element.name == "button-team-"..team) then
+		if (event.element.name == "choose-team-"..team) then
 			set_player_team(player, team)
-			if (not pvp_debug) then
-				player.gui.center["flow_team_chooser"].destroy()
-			end
+      update_team_count_label(team)
+			player.gui.center["team_change_gui"].destroy()
 			return
 		end
 	end
---[[
-  if (event.element.name == "send" and player.gui.top.flow_chat.frame_chat.flw_chat.chattext.text ~= "") then
-    for _, p in pairs(game.players) do
-      if p.connected then
-        p.print(player.name .. ": " .. player.gui.top.flow_chat.frame_chat.flw_chat.chattext.text)
-      end
-    end
-    player.gui.top.flow_chat.frame_chat.flw_chat.chattext.text = ""
-    return
-	end]]--
 
-  -- SHOWS A CHANGE TEAM BUTTON FOR THE OTHER TEAM
+  -- Request balance callback: Shows team change button for other teams
 
-  if (event.element.name == "request-balance" and are_teams_unbalanced()) then
+  if (event.element.name == "request-team-balance") then
 
     for _, p in pairs(game.players) do
       if(p.connected and p.force.name ~= "pregame"
@@ -252,11 +252,14 @@ script.on_event(defines.events.on_gui_click, function(event)
 			expand_gui_teleport(player)
 		end
 	end
+
 end)
 
 -- DEBUG
-function expand_gui_teleport( player )
+function expand_gui_teleport(player)
+
 	local frame = player.gui.left["teleport-chooser"]
+
 	if (frame) then
 		frame.destroy()
 	else
@@ -266,5 +269,5 @@ function expand_gui_teleport( player )
 			table.add{type="button", name="button-location-"..location, caption=location}
 		end
 	end
+
 end
--------------
