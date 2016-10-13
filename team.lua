@@ -30,16 +30,6 @@ team_locations = {
 
 }
 
--- Amount of players on each team
-
-global.team_count = {
-  pregame = 0,
-  red = 0,
-  blue = 0,
-  yellow = 0,
-  purple = 0,
-}
-
 global.team_score = {
   red = 0,
   blue = 0,
@@ -58,17 +48,25 @@ function set_teams_positions()
   end
 end
 
--- SETS THE PLAYER TEAM
-
 function set_player_team( player, team )
 
 	player.force = team
 	player.color = team_colors[team]
 	player.teleport(team_locations[team])
 
-  --update_teamcount_gui()
+  --update_team_count_gui()
 
   if(team ~= "pregame") then
     send_message_to_all(player.name .. " joined the " .. team .. " team!")
   end
+end
+
+function get_team_count(team)
+  local count = 0
+  for _, p in pairs(game.players) do
+    if p.connected and p.force.name == team then
+      count = count + 1
+    end
+  end
+  return count
 end

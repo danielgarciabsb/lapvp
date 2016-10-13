@@ -11,8 +11,8 @@ flow_style =
 {
 	top_padding = 0,
 	bottom_padding = 0,
-	left_padding = 0,
-	right_padding = 0,
+	left_padding = 5,
+	right_padding = 5,
 	resize_row_to_width = true,
 
 }
@@ -26,6 +26,17 @@ textfield_style =
 	minimal_width = 500,
 	maximal_width = 800,
   minimal_height = 30,
+}
+
+table_style =
+{
+  --cell_spacing = 0,
+  vertical_spacing = 2,
+  horizontal_spacing = 5,
+  top_padding = 0,
+	right_padding = 0,
+	bottom_padding = 0,
+	left_padding = 0,
 }
 
 button_style =
@@ -50,8 +61,7 @@ button_team_choose_style =
   minimal_height = 80,
 }
 
-
--- APPLIES THE STYLE TO THE ELEMENT GIVEN A STYLE ARRAY
+-- Applies the style to the element given a style array
 
 function apply_style(style_arr, element)
   for k, v in pairs(style_arr) do
@@ -59,103 +69,74 @@ function apply_style(style_arr, element)
   end
 end
 
--- CHAT GUI
---[[
-function create_chat_gui( player )
+-- Team count guy update
 
-	if (not player.gui.top["chat"]) then
+function show_status_gui_for_player(player)
 
-    local flow = player.gui.top.add({type = "flow", name = "flow_chat", direction = "horizontal"})
+    if (not player.connected) or player.gui.left["status_gui"] then return end
 
-    local frame = flow.add({type = "frame", name = "frame_chat", caption = "General Chat"})
-    apply_style(frame_style, frame)
+    -- Creates the status frame
+    local frame = player.gui.left.add{type = "frame", name = "status_gui", direction = "vertical"}
 
-    frame = frame.add({type = "flow", name = "flw_chat", direction = "vertical"})
-    apply_style(flow_style, frame)
+    -- Creates the player count flow
+    local flow = frame.add({type = "flow", direction = "vertical"})
+    apply_style(flow_style, flow)
+    -- Creates the player count labels
+    local label = flow.add{type = "label", caption = "Players on team"}
+    label.style.font="default-large-bold"
 
-    local guielem = frame.add({type = "textfield", name = "chattext", text = ""})
-    apply_style(textfield_style, guielem)
+    local table = flow.add{type = "table", colspan=4}
+    apply_style(table_style, table)
 
-    guielem = frame.add({type = "button", name = "send", caption = "Send"})
-    apply_style(button_style, guielem)
-	end
-end]]--
+    for _,team in ipairs(teams) do
+      if(team ~= "pregame") then
 
--- TEAM COUNT GUI
-
-function update_teamcount_gui()
-  for _, p in pairs(game.players) do
-    if p.connected then
-      if (p.gui.left["amount_players"]) then
-        p.gui.left["amount_players"].destroy()
-      end
-      if (not p.gui.left["amount_players"]) then
-        local frame = p.gui.left.add{type = "frame", name = "amount_players", direction = "vertical"}
-
-        local flow = frame.add({type = "flow", name = "flw_amount", direction = "vertical"})
-        apply_style(flow_style, frame)
-
-        -- SHOW THE AMOUNT OF PLAYERS ON TEAMS
-
-        flow.add{type = "label", caption = "Players on team", name="amount_desc"}
-        flow.amount_desc.style.font="default-large-bold"
-
-        flow.add{type = "table", name="amount_players_table", colspan=4}
-
-        local label = flow.amount_players_table.add{type = "label", caption = "Red: "}
-        label.style.font_color=team_colors["red"]
-        label.style.font="default-listbox"
-
-        label = flow.amount_players_table.add{type = "label", caption = global.team_count['red']}
+        label = table.add{type = "label", caption = get_team_count(team)}
         label.style.font="default-large"
 
-        local label = flow.amount_players_table.add{type = "label", caption = "Blue: "}
-        label.style.font_color=team_colors["blue"]
+        label = table.add{type = "label", caption = {team}}
+        label.style.font_color=team_colors[team]
         label.style.font="default-listbox"
 
-        label = flow.amount_players_table.add{type = "label", caption = global.team_count['blue']}
-        label.style.font="default-large"
-
-        -- SHOW THE SCORE
-
-        local flow = frame.add({type = "flow", name = "flw_score", direction = "vertical"})
-        apply_style(flow_style, frame)
-
-        flow.add{type = "label", caption = "Score (kills)", name="score_label"}
-        flow.score_label.style.font="default-large-bold"
-
-        flow.add{type = "table", name="score_label_table", colspan=4}
-
-        local label = flow.score_label_table.add{type = "label", caption = "Red: "}
-        label.style.font_color=team_colors["red"]
-        label.style.font="default-listbox"
-
-        label = flow.score_label_table.add{type = "label", caption = global.team_score['red']}
-        label.style.font="default-large"
-
-        local label = flow.score_label_table.add{type = "label", caption = "Blue: "}
-        label.style.font_color=team_colors["blue"]
-        label.style.font="default-listbox"
-
-        label = flow.score_label_table.add{type = "label", caption = global.team_score['blue']}
-        label.style.font="default-large"
-
-        -- SHOW THE OBJECTIVES
-
-        local flow = frame.add({type = "flow", name = "flw_obj", direction = "vertical"})
-        apply_style(flow_style, frame)
-
-        flow.add{type = "label", caption = "Objective", name="obj_title"}
-        flow.obj_title.style.font="default-large-bold"
-
-        flow.add{type = "label", caption = "Protect your base", name="obj1"}
-        flow.obj1.style.font="default"
-
-        flow.add{type = "label", caption = "Launch a rocket", name="obj2"}
-        flow.obj2.style.font="default"
       end
     end
-  end
+
+    -- Creates the score flow
+    flow = frame.add({type = "flow", direction = "vertical"})
+    apply_style(flow_style, flow)
+
+    label = flow.add{type = "label", caption = "Score (kills)"}
+    label.style.font="default-large-bold"
+
+    table = flow.add{type = "table", colspan=4}
+
+    for _,team in ipairs(teams) do
+      if(team ~= "pregame") then
+
+        local label = table.add{type = "label", caption = {team}}
+        label.style.font_color=team_colors[team]
+        label.style.font="default-listbox"
+
+        label = table.add{type = "label", caption = global.team_score[team]}
+        label.style.font="default-large"
+
+      end
+    end
+
+    -- SHOW THE OBJECTIVES
+
+    local flow = frame.add({type = "flow", name = "flw_obj", direction = "vertical"})
+    apply_style(flow_style, frame)
+
+    flow.add{type = "label", caption = "Objective", name="obj_title"}
+    flow.obj_title.style.font="default-large-bold"
+
+    flow.add{type = "label", caption = "Get a life", name="obj1"}
+    flow.obj1.style.font="default"
+
+    flow.add{type = "label", caption = "Get a job", name="obj2"}
+    flow.obj2.style.font="default"
+
 end
 
 -- TEAM CHOOSER GUI

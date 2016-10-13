@@ -17,9 +17,12 @@ end)
 
 script.on_event(defines.events.on_player_created, function(event)
 	local player = game.players[event.player_index]
-	player.print({"welcome-message", player.name})
+
+  send_message_to_all({"welcome-message", player.name})
+	player.print({"choose-team-message"})
 
   set_player_team(player, "pregame")
+  show_status_gui_for_player(player)
 	--create_team_chooser_gui(player)
 
 end)
