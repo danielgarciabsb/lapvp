@@ -31,7 +31,13 @@ team_locations = {
 }
 
 -- Holds the team score
-global.team_score = {}
+global.team_score =
+{
+  red = 0,
+  blue = 0,
+  yellow = 0,
+  purple = 0,
+}
 
 function set_teams_positions()
   surface = game.surfaces['nauvis']
@@ -50,7 +56,7 @@ function set_player_team( player, team )
 	player.color = team_colors[team]
 	player.teleport(team_locations[team])
 
-  --update_team_count_gui()
+  update_team_count_label()
 
   if(team ~= "pregame") then
     send_message_to_all(player.name .. " joined the " .. team .. " team!")
