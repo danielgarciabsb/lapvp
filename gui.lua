@@ -121,7 +121,7 @@ end
 
 -- Updates all team score labels
 
-function update_team_score()
+function update_team_score_label()
   for _, p in pairs(game.players) do
     if p.connected then
       for _,team in ipairs(teams) do

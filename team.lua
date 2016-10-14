@@ -20,23 +20,14 @@ team_colors = {
 team_locations = {
 
 	-- Lobby spawn
-  pregame = { x =   -143, y =   1241 },
+  pregame = { x =   0, y =   0 },
 
   -- Team spawns
-	red     = { x =   -583, y =   -692 },
-  blue     = { x =   -583, y =   -692 },
-	yellow    = { x =   517,  y =   635  },
-	purple    = { x =   517,  y =   635  },
+	red     = { x =   0, y =   0 },
+  blue     = { x =   0, y =   0 },
+	yellow    = { x =   0, y =   0 },
+	purple    = { x =   0, y =   0 },
 
-}
-
--- Holds the team score
-global.team_score =
-{
-  red = 0,
-  blue = 0,
-  yellow = 0,
-  purple = 0,
 }
 
 function set_teams_positions()
