@@ -46,7 +46,7 @@ function show_status_gui_for_player(player)
     label = flow.add{type = "label", caption = {"score"}}
     label.style.font="default-large-bold"
 
-    table = flow.add{type = "table", colspan=4}
+    table = flow.add{type = "table", colspan=2}
 
     for _,team in ipairs(teams) do
       if(team ~= "pregame") then

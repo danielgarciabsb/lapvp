@@ -23,10 +23,10 @@ team_locations = {
   pregame = { x =   0, y =   0 },
 
   -- Team spawns
-	red     = { x =   0, y =   0 },
-  blue     = { x =   0, y =   0 },
-	yellow    = { x =   0, y =   0 },
-	purple    = { x =   0, y =   0 },
+	red     = { x =   -1000, y =   -1000 },
+  blue     = { x =   1000, y =   1000 },
+	yellow    = { x =   1000, y =  -1000 },
+	purple    = { x =   -1000, y =   1000 },
 
 }
 
@@ -47,6 +47,10 @@ function set_player_team( player, team )
 	player.color = team_colors[team]
 	player.teleport(team_locations[team])
 
+  if get_team_count_dc(team) == 0 then
+    generate_silo_structure(team)
+  end
+
   update_team_count_label()
 
   if(team ~= "pregame") then
@@ -61,8 +65,15 @@ function get_team_count(team)
       count = count + 1
     end
   end
-  if team == "yellow" then
-    count = count + 2
+  return count
+end
+
+function get_team_count_dc(team)
+  local count = 0
+  for _, p in pairs(game.players) do
+    if p.force.name == team then
+      count = count + 1
+    end
   end
   return count
 end
