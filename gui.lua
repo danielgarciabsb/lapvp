@@ -78,11 +78,14 @@ function show_status_gui_for_player(player)
     label = flow.add{type = "label", caption = {"objective3"}}
     label.style.font="default"
 
+    label = flow.add{type = "label", caption = {"objective4"}}
+    label.style.font="default"
+
 end
 
--- Creates the team change GUI
+-- Creates the team choose GUI
 
-function create_team_change_gui(player)
+function create_team_choose_gui(player)
 
 	if (not player.gui.center["team_change_gui"]) then
 
@@ -101,6 +104,35 @@ function create_team_change_gui(player)
 		end
 	end
 
+end
+
+-- Creates the team change GUI
+
+function show_team_change_gui(player)
+
+	if (not player.gui.center["team_change_gui"]) then
+
+		local frame = player.gui.center.add{type="frame", caption = "Choose a team", name="team_change_gui"}
+    apply_style(frame_style, frame)
+
+    local flow = frame.add({type = "flow", direction = "vertical"})
+    apply_style(flow_style, flow)
+
+		for _,team in ipairs(teams) do
+			if (team ~= "pregame" and global.request_balance[team]) then
+				local button = flow.add{type="button", name="choose-team-"..team, caption={team}}
+        apply_style(button_team_choose_style, button)
+        button.style.font_color=team_colors[team]
+			end
+		end
+	end
+
+end
+
+function hide_change_team_gui(player)
+  if (player.gui.center["team_change_gui"]) then
+    player.gui.center["team_change_gui"].destroy()
+  end
 end
 
 -- Updates all team count labels
@@ -133,6 +165,34 @@ function update_team_score_label()
   end
 end
 
+-- Place the team balance request button
+
+function show_team_balance_request_button(player)
+  if (not player.gui.top["request-balance-button"]) then
+		player.gui.top.add{type="button", name="request-balance-button", caption={"request-balance"}}
+	end
+end
+
+function hide_team_balance_request_button(player)
+  if (player.gui.top["request-balance-button"]) then
+		player.gui.top["request-balance-button"].destroy()
+	end
+end
+
+-- Place the change team button
+
+function show_change_team_button(player)
+  if (not player.gui.top["change-team-button"]) then
+		player.gui.top.add{type="button", name="change-team-button", caption={"change-team"}}
+	end
+end
+
+function hide_change_team_button(player)
+  if (player.gui.top["change-team-button"]) then
+		player.gui.top["change-team-button"].destroy()
+	end
+end
+
 -- GUI Callback
 
 script.on_event(defines.events.on_gui_click, function(event)
@@ -143,10 +203,26 @@ script.on_event(defines.events.on_gui_click, function(event)
 	for _,team in ipairs(teams) do
 		if (event.element.name == "choose-team-"..team) then
 			set_player_team(player, team)
-			player.gui.center["team_change_gui"].destroy()
+      hide_change_team_gui(player)
 			return
 		end
 	end
+
+-- Team balance request
+
+  if (event.element.name == "request-balance-button") then
+    if(not global.request_balance[player.force.name]) then
+      global.request_balance[player.force.name] = true
+      send_message_to_all(player.name .. " from " .. player.force.name .. " is requesting a team balance")
+    end
+    return
+  end
+
+  if (event.element.name == "change-team-button") then
+    hide_change_team_button(player)
+    show_team_change_gui(player)
+    return
+  end
 
 -- DEBUG
 

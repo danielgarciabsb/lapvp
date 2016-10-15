@@ -7,11 +7,7 @@ function anti_color_change()
 
         player.color = team_colors[player.force.name]
         player.print("You can't change your color! If you insist you'll get banned!")
-        for _, p in pairs(game.players) do
-          if p.connected then
-            p.print(player.name .. " tried to change color which is not allowed!")
-          end
-        end
+        send_message_to_all(player.name .. " tried to change color which is not allowed!")
       end
     end
   end

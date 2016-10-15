@@ -61,5 +61,8 @@ function get_team_count(team)
       count = count + 1
     end
   end
+  if team == "yellow" then
+    count = count + 2
+  end
   return count
 end
