@@ -36,24 +36,43 @@ function generate_silo_structure(team)
     end
   end
 
+  for i=-10,12 do
+    for j=-10,12 do
+      surface.create_entity({name="stone-wall", force=team, amount=1, position={x-0.5+i, y-0.5+j}})
+    end
+  end
+
+  for _, entity in ipairs(surface.find_entities({{x-9,y-9}, {x+0.5+9,y+0.5+9}})) do
+    entity.destroy()
+  end
+
   surface.create_entity({name="rocket-silo", force=team, amount=1, position={x,y}})
 
   surface.find_entity('rocket-silo',{x,y}).minable = false
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y-8}})
+  local entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y-8}})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y-8}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y-8}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y-8}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y-8}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y+9}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y+9}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y+9}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
-  surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y+9}})
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y+9}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
+
+  entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y+9}})
+  entity.insert({name="piercing-rounds-magazine", count=100})
 
 end

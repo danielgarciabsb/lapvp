@@ -47,13 +47,12 @@ function set_player_team( player, team )
 	player.color = team_colors[team]
 	player.teleport(team_locations[team])
 
-  if get_team_count_dc(team) == 0 then
-    generate_silo_structure(team)
-  end
-
   update_team_count_label()
 
   if(team ~= "pregame") then
+    if get_team_count_dc(team) == 1 then
+      generate_silo_structure(team)
+    end
     send_message_to_all(player.name .. " joined the " .. team .. " team!")
   end
 end
