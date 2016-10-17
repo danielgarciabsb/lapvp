@@ -20,19 +20,19 @@ function generate_silo_structure(team)
 
   for i=-20,20 do
     for j=-20,20 do
-      surface.set_tiles({{name="grass", position={x+i, y+j}}})
+      surface.set_tiles({{name="grass",force=team, position={x+i, y+j}}})
     end
   end
 
   for i=-9,9 do
     for j=-9,9 do
-      surface.set_tiles({{name="hazard-concrete-left", position={x+i, y+j}}})
+      surface.set_tiles({{name="hazard-concrete-left",force=team, position={x+i, y+j}}})
     end
   end
 
   for i=-7,7 do
     for j=-7,7 do
-      surface.set_tiles({{name="concrete", position={x+i, y+j}}})
+      surface.set_tiles({{name="concrete",force=team, position={x+i, y+j}}})
     end
   end
 
@@ -53,26 +53,34 @@ function generate_silo_structure(team)
   local entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y-8}})
 
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y-8}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y-8}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x-8,y+9}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x,y+9}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
   entity = surface.create_entity({name="gun-turret", force=team, amount=1, position={x+9,y+9}})
   entity.insert({name="piercing-rounds-magazine", count=100})
+  entity.minable = false
 
 end

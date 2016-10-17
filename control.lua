@@ -5,18 +5,31 @@ require("silo")
 require("gui")
 require("anti_color_change")
 require("team_balance")
+require("spawn")
 require("misc")
 require("debug")
 
 WIN_SCORE = 100000 -- 100,000 points
 
 function check_win_conditions()
+  local win = false
   for _,team in ipairs(teams) do
     if(team ~= "pregame") then
       if(global.team_score[team] >= WIN_SCORE) then
-        -- Team has win
+        win = true
+        for _, p in pairs(game.players) do
+          if p.connected then
+            create_team_win_gui(p,team)
+            send_message_to_all("The " .. team .. " team has win the game!")
+            send_message_to_all("The server will now restart and reset the map to a new random one!")
+            send_message_to_all("Please rejoin the server!")
+          end
+        end
       end
     end
+  end
+  if win then
+    game.write_file("restart.info","restart")
   end
 end
 
@@ -119,7 +132,7 @@ script.on_event(defines.events.on_rocket_launched, function (event)
                         .. " launched a rocket and put a fish inside. "
                         .. " The fish probably died, poor goldy!")
     send_message_to_all("Team " .. event.rocket.force.name .. " scored "
-                        .. (WIN_SCORE * 0.3) .. " points!")
+                        .. (WIN_SCORE * 0.25) .. " points!")
   else
     send_message_to_all("Team " .. event.rocket.force.name
                         .. " launched a rocket but forgot to put a satellite. "
@@ -140,6 +153,15 @@ script.on_event(defines.events.on_research_finished, function (event)
     research.force.recipes["rocket-silo"].enabled=false
   end
 
+  research.force.recipes["laser-turret"].enabled=false
+  research.force.recipes["discharge-defense-equipment"].enabled=false
+  research.force.recipes["tank"].enabled=false
+  research.force.recipes["construction-robot"].enabled=false
+  research.force.recipes["discharge-defense-remote"].enabled=false
+  research.force.recipes["energy-shield-mk2-equipment"].enabled=false
+  research.force.recipes["personal-laser-defense-equipment"].enabled=false
+  research.force.recipes["destroyer-capsule"].enabled=false
+
 end)
 
 script.on_event(defines.events.on_player_joined_game, function (event)
@@ -152,38 +174,123 @@ end)
 script.on_event(defines.events.on_entity_died, function (event)
 
   local entity = event.entity
+  local force = event.force
+
+  if force.name == "enemy" or force.name == "neutral"
+    or entity.force.name == "enemy" or entity.force.name == "neutral" then
+      return
+    end
 
   -- Adds score if the team destroys enemy entity
   -- checks if the entity is not from the same team
-  if event.force ~= nil and event.force.name ~= entity.force.name then
+  if force ~= nil and force.name ~= entity.force.name then
     for _,team in ipairs(teams) do
       -- checks if the entity is owned by a team (~neutral)
-      if(team ~= "pregame" and team == event.entity.force.name) then
+      if(team ~= "pregame" and team == entity.force.name) then
         if entity.type == "player" then
-          global.team_score[event.force.name] =
-            global.team_score[event.force.name]
-            + 200
+          global.team_score[force.name] =
+            global.team_score[force.name]
+            + 500
         else
-          global.team_score[event.force.name] =
-            global.team_score[event.force.name]
-            + (entity.prototype.max_health / 10)
+          global.team_score[force.name] =
+            global.team_score[force.name]
+            + ((entity.prototype.max_health / 10)*2)
         end
+        global.team_score[force.name] = math.ceil(global.team_score[force.name])
       end
     end
   end
 
   -- Subtract score if the team gets entity destroyed
   for _,team in ipairs(teams) do
-    if(team ~= "pregame" and team == event.entity.force.name) then
-      global.team_score[event.entity.force.name] =
-        global.team_score[event.entity.force.name]
-        - (entity.prototype.max_health / 10)
-      if(global.team_score[event.entity.force.name] < 0) then
-        global.team_score[event.entity.force.name] = 0
+    if(team ~= "pregame" and team == entity.force.name) then
+      global.team_score[entity.force.name] =
+        global.team_score[entity.force.name]
+        - ((entity.prototype.max_health / 10)*2)
+      if(global.team_score[entity.force.name] < 0) then
+        global.team_score[entity.force.name] = 0
       end
+      global.team_score[force.name] = math.ceil(global.team_score[force.name])
     end
   end
 
   update_team_score_label()
+
+end)
+
+script.on_event(defines.events.on_chunk_generated, function (event)
+  local area = event.area
+  local surface = event.surface
+  local size = 200
+  local x = 0
+  local y = 0
+
+  for _,team in ipairs(teams) do
+    if(team ~= "pregame") then
+      x = team_locations[team].x
+      y = team_locations[team].y
+      if area.left_top.x > (x - size)
+        and area.left_top.y > (y - size)
+        and area.right_bottom.x < (x + size)
+        and area.right_bottom.y < (y + size) then
+          for _, entity in ipairs(surface.find_entities_filtered(
+                          {area = {{area.left_top.x,area.left_top.y},
+                          {area.right_bottom.x,area.right_bottom.y}},
+                           force="enemy"} )) do
+            entity.destroy()
+          end
+      end
+    end
+  end
+
+  size = 50
+
+  for _,team in ipairs(teams) do
+    if(team ~= "pregame") then
+      x = team_locations[team].x
+      y = team_locations[team].y
+      if area.left_top.x > (x - size)
+        and area.left_top.y > (y - size)
+        and area.right_bottom.x < (x + size)
+        and area.right_bottom.y < (y + size) then
+          for _, entity in ipairs(surface.find_entities_filtered(
+                          {area = {{area.left_top.x,area.left_top.y},
+                          {area.right_bottom.x,area.right_bottom.y}},
+                           type="tree"} )) do
+            entity.destroy()
+          end
+      end
+    end
+  end
+
+  for _,team in ipairs(teams) do
+    if(team ~= "pregame") then
+      if(team_locations[team].x < 0) then
+        x = team_locations[team].x + 100
+      else
+        x = team_locations[team].x - 100
+      end
+
+      if(team_locations[team].y < 0) then
+        y = team_locations[team].y + 100
+      else
+        y = team_locations[team].y - 100
+      end
+      if area.left_top.x > (x - size)
+        and area.left_top.y > (y - size)
+        and area.right_bottom.x < (x + size)
+        and area.right_bottom.y < (y + size) then
+          for _, entity in ipairs(surface.find_entities_filtered(
+                          {area = {{area.left_top.x,area.left_top.y},
+                          {area.right_bottom.x,area.right_bottom.y}},
+                           type="tree"} )) do
+            entity.destroy()
+          end
+      end
+    end
+  end
+
+  --send_message_to_all( "chunk generated {" .. area.left_top.x .. "," .. area.left_top.y .. "} , {"
+  --.. area.right_bottom.x .. "," .. area.right_bottom.y .. "}")
 
 end)

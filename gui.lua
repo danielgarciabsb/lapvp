@@ -125,6 +125,23 @@ function show_team_change_gui(player)
         button.style.font_color=team_colors[team]
 			end
 		end
+
+    local button = flow.add{type="button", name="cancel_team_change", caption={"cancel"}}
+    apply_style(button_team_choose_style, button)
+	end
+
+end
+
+-- Creates the team WIN GUI
+
+function create_team_win_gui(player, team)
+
+  hide_change_team_gui(player)
+
+	if (not player.gui.center["team_win_gui"]) then
+		player.gui.center.add{type="frame",
+    caption = "The " .. team .. " team has win the game! Server restarting, please rejoin!",
+    name="team_win_gui"}
 	end
 
 end
@@ -221,6 +238,11 @@ script.on_event(defines.events.on_gui_click, function(event)
   if (event.element.name == "change-team-button") then
     hide_change_team_button(player)
     show_team_change_gui(player)
+    return
+  end
+
+  if (event.element.name == "cancel_team_change") then
+    hide_change_team_gui(player)
     return
   end
 
